@@ -6,26 +6,19 @@ defmodule Clsx do
   React ecosystem.
   """
 
-  def clsx(list) when is_list(list) do
-    list
-    |> Enum.map(&resolve_classes/1)
-    |> Enum.reject(&is_nil/1)
+  def clsx([]), do: ""
+
+  def clsx(enumerable) when is_list(enumerable) or is_map(enumerable) do
+    enumerable
+    |> Enum.map(&clsx/1)
+    |> Enum.reject(fn el -> el in ["", nil] end)
     |> Enum.join(" ")
   end
 
-  defp resolve_classes(list) when is_list(list), do: clsx(list)
-
-  defp resolve_classes(map) when is_map(map) do
-    map
-    |> Enum.filter(fn {_, condition} -> condition end)
-    |> Enum.map(fn {name, _} -> to_string(name) end)
-    |> Enum.join(" ")
-  end
-
-  defp resolve_classes(string) when is_binary(string), do: string
-  defp resolve_classes(false), do: nil
-  defp resolve_classes(nil), do: nil
-  defp resolve_classes(atom) when is_atom(atom), do: Atom.to_string(atom)
-  defp resolve_classes({_, falsey}) when falsey in [nil, false], do: nil
-  defp resolve_classes({name, _}), do: name
+  def clsx(string) when is_binary(string), do: string
+  def clsx(false), do: ""
+  def clsx(nil), do: ""
+  def clsx(atom) when is_atom(atom), do: Atom.to_string(atom)
+  def clsx({_, falsey}) when falsey in [nil, false], do: ""
+  def clsx({name, _}), do: name
 end
